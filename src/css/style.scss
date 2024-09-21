@@ -1,7 +1,7 @@
 $white: #ffffff;
 $black: #000000;
-$primary1: #03a7d3;
-$primary2: #ff4646;
+$primary1: #A6B37D;
+$primary2: #B99470;
 $textCol: #999;
 
 @mixin main-font {
@@ -126,7 +126,7 @@ a:focus {
 /*header section*/
 .hero_area {
   position: relative;
-  background-color: #020230;
+  background-color: #16423C;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -465,7 +465,7 @@ a:focus {
 // server section
 
 .server_section {
-  background: linear-gradient(110deg, transparent 25%, #020230 25%);
+  background: linear-gradient(110deg, transparent 25%, #16423C 25%);
   padding: 55px 0;
   color: $white;
 
@@ -790,7 +790,7 @@ a:focus {
 
 /* info section */
 .info_section {
-  background-color: #020230;
+  background-color: #16423C;
   color: $white;
 
   h4 {
@@ -892,7 +892,7 @@ a:focus {
 
 .footer_section {
   position: relative;
-  background-color: #020230;
+  background-color: #16423C;
   text-align: center;
 
   p {

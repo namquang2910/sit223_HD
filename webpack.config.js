@@ -19,6 +19,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].bundle.js',
+        publicPath: '/',        
         clean: true, // Clean output directory before emit
     },
     module: {
@@ -49,6 +50,7 @@ module.exports = {
                     loader: 'babel-loader', // Optional: for ES6+ support
                 },
             },
+            
         ],
     },
     
@@ -56,22 +58,22 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './src/index.html',
             filename: 'index.html',
-            chunks: ['jquery', 'bootstrap', 'custom', 'styles'], // Include your styles here
+            chunks: ['jquery', 'bootstrap', 'custom', 'styles'] // Include your styles here
         }),
         new HtmlWebpackPlugin({
             template: './src/about.html',
             filename: 'about.html',
-            chunks: ['jquery', 'bootstrap', 'custom', 'styles'],
+            chunks: ['jquery', 'bootstrap', 'custom', 'styles'] // Include your styles here
         }),
         new HtmlWebpackPlugin({
             template: './src/contact.html',
             filename: 'contact.html',
-            chunks: ['jquery', 'bootstrap', 'custom', 'styles'],
+            chunks: ['jquery', 'bootstrap', 'custom', 'styles'] // Include your styles here
         }),
         new HtmlWebpackPlugin({
             template: './src/price.html',
             filename: 'price.html',
-            chunks: ['jquery', 'bootstrap', 'custom', 'styles'],
+            chunks: ['jquery', 'bootstrap', 'custom', 'styles'] // Include your styles here
         }),
         new HtmlWebpackPlugin({
             template: './src/service.html',
@@ -93,5 +95,12 @@ module.exports = {
             Popper: ['popper.js', 'default'], // Make sure Popper is available globally
         }),
     ],
-    mode: 'production'
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
+    },
+    mode: 'development',
+      devtool: 'source-map', // Enable source maps for both JS and CSS
+
 };
