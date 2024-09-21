@@ -1,45 +1,54 @@
 pipeline {
     agent any
-        tools {
-        nodejs 'NodeJS' // The name you provided in Jenkins Global Tool Configuration
+    tools {
+        nodejs 'NodeJS' // NodeJS tool defined in Jenkins Global Tool Configuration
     }
-
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred')  // Jenkins AWS credentials ID
+        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred')  // Same as above
+        S3_BUCKET = 'simpleweb-bucket'
+        APPLICATION_NAME = 'simple-web'  // CodeDeploy application name
+        DEPLOYMENT_GROUP_NAME = 'simpleWeb'  // CodeDeploy deployment group name
+        DEPLOYMENT_CONFIG_NAME = 'CodeDeployDefault.AllAtOnce'  // Deployment configuration
+        PATH = "${env.PATH}:/opt/homebrew/bin/" // Adjust PATH if needed
+    }
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'npm install'  // Install Node.js dependencies
             }
         }
         stage('Build') {
             steps {
-                // Run Webpack to build the project
-                sh 'npm run build'
-                // Archive build artifacts for further use or deployment
-                archiveArtifacts artifacts: 'dist/**/*', allowEmptyArchive: true
+                sh 'npm run build'  // Run Webpack to build the project
+                archiveArtifacts artifacts: 'dist/**/*', allowEmptyArchive: true  // Archive build artifacts
             }
         }
         stage('Test') {
             steps {
-                // Run Webpack to build the project
-                sh 'npm test'
+                sh 'npm test'  // Run tests
             }
         }
-        stage('Deploy') {
+        stage('Package') {
             steps {
-                script {
-                    // Build Docker image
-                    sh 'docker-compose build'
-                    // Deploy using Docker Compose
-                    sh 'docker-compose up -d'
-                }
+                // Create a ZIP file with the built application and required files
+                sh 'zip -r myapp.zip dist/* appspec.yml server.js Procfile package.json'
+                // Upload the ZIP file to S3
+                sh 'aws s3 cp myapp.zip s3://$S3_BUCKET/myapp.zip'
             }
         }
-    }
-
-    post {
-        always {
-            // Clean up after deployment (optional)
-            sh 'docker-compose down'
+        stage('Deploy to AWS CodeDeploy') {
+            steps {
+                // Deploy the application using AWS CodeDeploy
+                step([$class: 'AWSCodeDeployPublisher',
+                      applicationName: "${APPLICATION_NAME}",
+                      deploymentGroupName: "${DEPLOYMENT_GROUP_NAME}",
+                      deploymentConfig: "${DEPLOYMENT_CONFIG_NAME}",
+                      s3bucket: "${S3_BUCKET}",
+                      region: 'ap-southeast-2',  // Adjust the region as needed
+                      waitForCompletion: true  // Wait for the deployment to complete
+                ])
+            }
         }
     }
 }

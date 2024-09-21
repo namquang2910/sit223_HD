@@ -103,7 +103,7 @@ module.exports = {
     mode: 'development',
     devtool: 'source-map', // Enable source maps for both JS and CSS
     devServer: {
-        port: 8090,          // Set the port to 8080
-        host: '0.0.0.0',     // Allow external access
+        compress: true,
+        allowedHosts: "all"
     }
 };

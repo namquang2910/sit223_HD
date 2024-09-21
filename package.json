@@ -11,11 +11,7 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {
-    "express": "^4.21.0",
-    "jquery": "^3.7.1",
-    "popper.js": "^1.16.1",
-    "punycode": "^2.3.1",
+  "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7",
@@ -38,5 +34,11 @@
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "jquery": "^3.7.1",
+    "popper.js": "^1.16.1",
+    "punycode": "^2.3.1"
   }
 }
