@@ -32,7 +32,7 @@ pipeline {
         stage('Package') {
             steps {
                 // Create a ZIP file with the built application and required files
-                sh 'zip -r myapp.zip dist/* appspec.yml script/* Procfile package.json'
+                sh 'zip -r myapp.zip dist/* appspec.yml scripts/* Procfile package.json'
                 // Upload the ZIP file to S3
                 sh 'aws s3 cp myapp.zip s3://$S3_BUCKET/myapp.zip'
             }
