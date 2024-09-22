@@ -9,12 +9,6 @@ if [ ! -d "/var/www/myapp" ]; then
   sudo mkdir -p /var/www/myapp
 fi
 
-# Extract the deployment files to /var/www/myapp
-sudo unzip /opt/codedeploy-agent/deployment-root/deployment-archive/myapp.zip -d /var/www/myapp
-
-# Navigate to the deployment directory
-cd /var/www/myapp
-
 # Clean up any previous failed installations
 if [ -d "node_modules" ]; then
   sudo rm -rf node_modules
