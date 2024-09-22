@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "http-server dist -p 8090
-",
+    "start": "http-server dist -p 8090",
     "test": "jest"
   },
   "keywords": [],
