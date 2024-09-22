@@ -19,5 +19,4 @@ if [ -f "package.json" ]; then
   npm install
 else
   echo "Error: package.json not found!"
-  exit 1
 fi
