@@ -1,16 +1,6 @@
-#!/bin/bash
-
-# Update package lists
-sudo apt-get update
-
-# Install Node.js and npm
-sudo apt-get install -y nodejs npm
-
-# Create the deployment directory
-sudo mkdir -p /var/www/myapp
-
-# Navigate to the deployment directory
-cd /var/www/myapp
+# Update package lists for Amazon Linux
+sudo yum update -y
+sudo yum install -y nodejs 
 
 # Install project dependencies
 npm install
