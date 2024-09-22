@@ -4,8 +4,8 @@ pipeline {
         nodejs 'NodeJS' // NodeJS tool defined in Jenkins Global Tool Configuration
     }
     environment {
-        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred')  // Jenkins AWS credentials ID
-        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred')  // Same as above
+        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred	')  // Use the ID of your AWS credentials
+        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred	')  // Same as above
         S3_BUCKET = 'simpleweb-bucket'
         APPLICATION_NAME = 'simple-web'  // CodeDeploy application name
         DEPLOYMENT_GROUP_NAME = 'simpleWeb'  // CodeDeploy deployment group name
@@ -39,15 +39,12 @@ pipeline {
         }
         stage('Deploy to AWS CodeDeploy') {
             steps {
-                // Deploy the application using AWS CodeDeploy
-                step([$class: 'AWSCodeDeployPublisher',
-                      applicationName: "${APPLICATION_NAME}",
-                      deploymentGroupName: "${DEPLOYMENT_GROUP_NAME}",
-                      deploymentConfig: "${DEPLOYMENT_CONFIG_NAME}",
-                      s3bucket: "${S3_BUCKET}",
-                      region: 'ap-southeast-2',  // Adjust the region as needed
-                      waitForCompletion: true  // Wait for the deployment to complete
-                ])
+                  sh '''
+                aws deploy create-deployment --application-name simple-web \
+                --deployment-group-name simpleWeb \
+                --s3-location bucket=simpleweb-bucket,key=myapp.zip,bundleType=zip \
+                --region ap-southeast-2
+                '''
             }
         }
     }
