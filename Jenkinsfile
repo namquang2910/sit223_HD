@@ -42,6 +42,7 @@ pipeline {
                   sh '''
                 aws deploy create-deployment --application-name simple-web \
                 --deployment-group-name simpleWeb \
+                --ignore-application-stop-failures \
                 --s3-location bucket=simpleweb-bucket,key=myapp.zip,bundleType=zip \
                 --region ap-southeast-2
                 '''
