@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "express": "^4.21.0",
+    "hot-shots": "^10.1.1",
     "jquery": "^3.7.1",
     "popper.js": "^1.16.1",
     "punycode": "^2.3.1"
