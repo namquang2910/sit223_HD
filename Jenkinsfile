@@ -36,10 +36,6 @@ pipeline {
                 sh """
                 heroku git:remote -a ${HEROKU_APP_STAGING}
                 // Fetch remote changes
-                sh "git fetch heroku"
-                
-                // Merge remote changes
-                sh "git merge heroku/main || true"  // Ignore merge errors if no changes
                 git add .
                 git commit -m "Deploy to staging"
                 git push heroku main
