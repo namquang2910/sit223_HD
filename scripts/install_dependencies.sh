@@ -1,5 +1,5 @@
 #!/bin/bash
-export HOME=/home/ec2-user  # Change this to the actual user’s home directory
+export HOME=/home/ssm-user  # Change this to the actual user’s home directory
 
 # Update package lists for Amazon Linux
 sudo yum update -y
