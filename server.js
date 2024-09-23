@@ -18,7 +18,6 @@ app.use((req, res, next) => {
     const duration = Date.now() - startTime; // Calculate request duration
     dogstatsd.timing('request.response_time', duration); // Send timing metric
     dogstatsd.increment('request.status_code.' + res.statusCode); // Track status codes
-    logger.info(`Handled request: ${req.method} ${req.url} with status ${res.statusCode} in ${duration}ms`);
   });
 
   dogstatsd.increment('request.count'); // Increment request count
