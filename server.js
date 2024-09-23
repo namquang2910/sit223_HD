@@ -8,7 +8,7 @@ const app = express();
 const dogstatsd = new StatsD({
   host: 'localhost', // Use your Datadog region
   port: 8125,
-  prefix: 'simpleweb.' // Prefix for your metrics
+  prefix: 'simple.' // Prefix for your metrics
 });
 
 // Middleware to track request metrics
