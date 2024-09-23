@@ -12,7 +12,7 @@ const dogstatsd = new StatsD({
 // Middleware to track request count
 app.use((req, res, next) => {
   dogstatsd.increment('request.count'); // Increment request count
-  next();
+  next(); 
 });
 
 // Middleware to track response time
