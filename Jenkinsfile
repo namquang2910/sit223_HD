@@ -11,6 +11,10 @@ pipeline {
         DEPLOYMENT_GROUP_NAME = 'simpleWeb'  // CodeDeploy deployment group name
         DEPLOYMENT_CONFIG_NAME = 'CodeDeployDefault.AllAtOnce'  // Deployment configuration
         PATH = "${env.PATH}:/opt/homebrew/bin/" // Adjust PATH if needed
+
+        HEROKU_API_KEY = credentials('heroku-api-key')  // Your Heroku API key
+        HEROKU_APP_STAGING = 'simpleweb-stagging'
+        HEROKU_APP_PRODUCTION = 'simpleweb-production'
     }
     stages {
         stage('Install Dependencies') {
@@ -29,24 +33,34 @@ pipeline {
                 sh 'npm test'  // Run tests
             }
         }
-        stage('Package') {
+        stage('Deploy to Staging') {
             steps {
-                // Create a ZIP file with the built application and required files
-                sh 'zip -r myapp.zip dist/* appspec.yml scripts/* Procfile package.json server.js'
-                // Upload the ZIP file to S3
-                sh 'aws s3 cp myapp.zip s3://$S3_BUCKET/myapp.zip'
+                sh """
+                heroku git:remote -a ${HEROKU_APP_STAGING}
+                git add .
+                git commit -m "Deploy to staging"
+                git push heroku main
+                """
             }
         }
-        stage('Deploy to AWS CodeDeploy') {
+        stage('Deploy to Production') {
             steps {
-                  sh '''
-                aws deploy create-deployment --application-name simple-web \
-                --deployment-group-name simpleWeb \
-                --ignore-application-stop-failures \
-                --s3-location bucket=simpleweb-bucket,key=myapp.zip,bundleType=zip \
-                --region ap-southeast-2
-                '''
+                input 'Approve deployment to production?'  // Manual approval step
+                sh """
+                heroku git:remote -a ${HEROKU_APP_PRODUCTION}
+                git add .
+                git commit -m "Deploy to production"
+                git push heroku main
+                """
+            }
             }
         }
+        post {
+            success {
+                echo 'Deployment was successful!'
+            }
+            failure {
+                echo 'Deployment failed.'
+            }  
     }
 }
