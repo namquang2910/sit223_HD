@@ -1,5 +1,5 @@
 #!/bin/bash
-export HOME=/home/ec2-user  # Change this to the actual user’s home directory
+export HOME=/home/ssm-user  # Change this to the actual user’s home directory
 
 # Navigate to the application directory
 cd /var/www/myapp
