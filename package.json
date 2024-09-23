@@ -40,6 +40,8 @@
     "hot-shots": "^10.1.1",
     "jquery": "^3.7.1",
     "popper.js": "^1.16.1",
-    "punycode": "^2.3.1"
+    "punycode": "^2.3.1",
+    "save-dev": "^0.0.1-security",
+    "winston": "^3.14.2"
   }
 }
