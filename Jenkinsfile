@@ -10,6 +10,11 @@ pipeline {
         HEROKU_APP_PRODUCTION = 'simpleweb-production'
     }
     stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/your-repo.git', branch: 'main'
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'  // Install Node.js dependencies
