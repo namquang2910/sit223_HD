@@ -25,8 +25,6 @@ app.use((req, res, next) => {
 
   next();
 });
-dogstatsd.increment('request.count');
-
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
