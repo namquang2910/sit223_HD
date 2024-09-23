@@ -4,8 +4,8 @@ pipeline {
         nodejs 'NodeJS' // NodeJS tool defined in Jenkins Global Tool Configuration
     }
     environment {
-        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred	')  // Use the ID of your AWS credentials
-        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred	')  // Same as above
+        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred')  // Use the ID of your AWS credentials
+        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred')  // Same as above
         S3_BUCKET = 'simpleweb-bucket'
         APPLICATION_NAME = 'simple-web'  // CodeDeploy application name
         DEPLOYMENT_GROUP_NAME = 'simpleWeb'  // CodeDeploy deployment group name
@@ -32,7 +32,7 @@ pipeline {
         stage('Package') {
             steps {
                 // Create a ZIP file with the built application and required files
-                sh 'zip -r myapp.zip dist/* appspec.yml scripts/* Procfile package.json'
+                sh 'zip -r myapp.zip dist/* appspec.yml scripts/* Procfile package.json server.js'
                 // Upload the ZIP file to S3
                 sh 'aws s3 cp myapp.zip s3://$S3_BUCKET/myapp.zip'
             }
