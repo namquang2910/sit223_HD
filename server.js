@@ -4,7 +4,7 @@ const StatsD = require('hot-shots');
 
 const app = express();
 const dogstatsd = new StatsD({
-  host: 'us5.datadoghq.com', // Datadog host
+  host: 'datadoghq.com', // Datadog host
   port: 8125,
   prefix: 'simpleweb.' // Metric prefix
 });
