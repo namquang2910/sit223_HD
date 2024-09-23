@@ -35,8 +35,7 @@ pipeline {
             steps {
                 sh """
                 heroku git:remote -a ${HEROKU_APP_STAGING}
-                git remote add heroku https://git.heroku.com/${HEROKU_APP_STAGING}.git
-                git push heroku main 
+                git push heroku main --force
                 """
             }
         }
