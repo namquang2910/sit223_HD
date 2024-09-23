@@ -35,21 +35,14 @@ pipeline {
             steps {
                 sh """
                 heroku git:remote -a ${HEROKU_APP_STAGING}
-                // Fetch remote changes
-                git add .
-                git commit -m "Deploy to staging"
                 git push heroku main
                 """
             }
         }
         stage('Deploy to Production') {
             steps {
-                input 'Approve deployment to production?'  // Manual approval step
                 sh """
-                git checkout -b main
                 heroku git:remote -a ${HEROKU_APP_PRODUCTION}
-                git add .
-                git commit -m "Deploy to production"
                 git push heroku main
                 """
             }
