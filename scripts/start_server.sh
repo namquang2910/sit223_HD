@@ -6,4 +6,3 @@ cd /var/www/myapp
 pm2 kill
 pm2 start npm --name "deloy" -- start
 pm2 status
-exit 1
