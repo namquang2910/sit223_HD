@@ -4,34 +4,24 @@ const StatsD = require('hot-shots');
 
 const app = express();
 const dogstatsd = new StatsD({
-  host: 'us5.datadoghq.com', // Use 'us5.datadoghq.com' for Datadog's US region
+  host: 'us5.datadoghq.com', // Datadog host
   port: 8125,
-  prefix: 'simpleweb.' // Replace with your application's prefix
+  prefix: 'simpleweb.' // Metric prefix
 });
 
-// Middleware to log requests
+// Middleware to track request count
 app.use((req, res, next) => {
-  const startTime = Date.now(); // Start time to calculate response time
+  dogstatsd.increment('request.count'); // Increment request count
+  next();
+});
 
-  // Increment request count
-  dogstatsd.increment('request.count');
-
-  // End response and calculate duration
+// Middleware to track response time
+app.use((req, res, next) => {
+  const startTime = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-    dogstatsd.timing('request.response_time', duration); // Log response time
-
-    // Increment response metrics based on status code
-    dogstatsd.increment('response.count'); // Total responses
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      dogstatsd.increment('response.success'); // Successful responses
-    } else if (res.statusCode >= 400 && res.statusCode < 500) {
-      dogstatsd.increment('response.client_errors'); // Client errors
-    } else if (res.statusCode >= 500) {
-      dogstatsd.increment('response.server_errors'); // Server errors
-    }
+    dogstatsd.timing('request.response_time', duration); // Send response time
   });
-
   next();
 });
 
