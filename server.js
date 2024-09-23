@@ -14,10 +14,27 @@ const logger = winston.createLogger({
   ]
 });
 
-// Example route that logs information
+/ Periodic logging function
+const logServerMetrics = () => {
+  const memoryUsage = process.memoryUsage();
+  logger.info('Server Metrics', {
+    timestamp: new Date().toISOString(),
+    memoryUsage: {
+      rss: memoryUsage.rss, // Resident Set Size
+      heapTotal: memoryUsage.heapTotal,
+      heapUsed: memoryUsage.heapUsed,
+      external: memoryUsage.external
+    }
+  });
+};
+
+// Set interval to log server metrics every 5 seconds
+setInterval(logServerMetrics, 1000); // Logs every 5 seconds
+
+// Example HTTP request logging
 app.get('/', (req, res) => {
   logger.info('Hello from Heroku NodeJS app!', { timestamp: new Date().toISOString() });
-  res.send('Logging with Winston and sending to Datadog!');
+  res.send('Logging with Winston continuously!');
 });
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
