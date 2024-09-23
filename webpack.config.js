@@ -101,7 +101,6 @@ module.exports = {
         maxAssetSize: 512000
     },
     mode: 'development',
-    devtool: 'source-map', // Enable source maps for both JS and CSS
     devServer: {
         compress: true,
         allowedHosts: "all"
