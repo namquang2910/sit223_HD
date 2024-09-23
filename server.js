@@ -14,7 +14,6 @@ const logger = winston.createLogger({
   ]
 });
 
-/ Periodic logging function
 const logServerMetrics = () => {
   const memoryUsage = process.memoryUsage();
   logger.info('Server Metrics', {
