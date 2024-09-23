@@ -1,34 +1,47 @@
 const express = require('express');
 const path = require('path');
+const winston = require('winston');
 const StatsD = require('hot-shots');
 
 const app = express();
 
-// Set up StatsD client for Datadog
+// Configure StatsD for Datadog
 const dogstatsd = new StatsD({
-  host: 'localhost', // Use your Datadog region
+  host: 'https://simpleweb-production-38a2f21a4cd2.herokuapp.com/', // For Heroku, use localhost
   port: 8125,
-  prefix: 'simple.' // Prefix for your metrics
+  prefix: 'simpleweb.' // Prefix for your metrics
 });
 
-// Middleware to track request metrics
-app.use((req, res, next) => {
-  const startTime = Date.now(); // Start timer for request duration
-  res.on('finish', () => {
-    const duration = Date.now() - startTime; // Calculate request duration
-    dogstatsd.timing('request.response_time', duration); // Send timing metric
-    dogstatsd.increment('request.status_code.' + res.statusCode); // Track status codes
-  });
+// Configure Winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console(), // Log to console
+    // You can add other transports here (e.g., file)
+  ]
+});
 
-  dogstatsd.increment('request.count'); // Increment request count
+// Middleware to log requests and send metrics
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+
+    // Log the request
+    logger.info(`Request to ${req.url} took ${duration}ms`);
+
+    // Send metrics to Datadog
+    dogstatsd.increment('request.count'); // Increment request count
+    dogstatsd.timing('request.response_time', duration); // Send timing metric
+  });
   next();
 });
-dogstatsd.increment('page.views'); // Increment request count
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Handle SPA routing
+// Handle SPA (Single Page Application) routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
@@ -36,5 +49,5 @@ app.get('*', (req, res) => {
 // Listen on the port Heroku provides (or fallback to 3000 locally)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  dogstatsd.increment('server.start'); // Track server start event
+  console.log(`Server is listening on port ${PORT}`);
 });
