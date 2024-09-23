@@ -11,54 +11,37 @@ const dogstatsd = new StatsD({
   prefix: 'myapp.' // Use a prefix for your application's metrics
 });
 
-// Variables to hold aggregated metrics
-let requestCount = 0;
-let totalResponseTime = 0;
-let totalResponseSize = 0;
-let errorCount = 0;
-
 // Middleware to log request count and duration
 app.use((req, res, next) => {
   const startTime = Date.now();
 
   // Increment request count
-  requestCount++;
+  dogstatsd.increment('request.count');
 
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-
-    // Aggregate response time and size
-    totalResponseTime += duration;
-    const responseSize = res.get('Content-Length') || 0;
-    totalResponseSize += responseSize;
-
-    // Track HTTP status codes
-    if (res.statusCode >= 400) {
-      errorCount++;
-    }
-
-    // Example: Log metrics immediately for individual requests
-    dogstatsd.increment('request.count');
+    // Log request duration
     dogstatsd.timing('request.response_time', duration);
-    dogstatsd.histogram('response.size', responseSize);
+    // Log response size
+    dogstatsd.histogram('response.size', res.get('Content-Length') || 0);
+    // Track HTTP status codes
     dogstatsd.increment(`response.status.${res.statusCode}`);
+    dogstatsd.increment('response.status', res.statusCode);
+    dogstatsd.timing('response.average_time', duration);
+    // Increment response metrics based on status code
+    dogstatsd.increment('response.count'); // Total responses
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      dogstatsd.increment('response.success'); // Successful responses
+    } else if (res.statusCode >= 400 && res.statusCode < 500) {
+      dogstatsd.increment('response.client_errors'); // Client errors
+    } else if (res.statusCode >= 500) {
+      dogstatsd.increment('response.server_errors'); // Server errors
+    } 
   });
 
   next();
 });
 
-// Middleware to track errors
-app.use((err, req, res, next) => {
-  errorCount++; // Increment error count
-  console.error(err.stack); // Log the error stack trace
-  res.status(500).send('Something went wrong!'); // Send a generic error response
-});
-
-// Custom Metrics Example
-app.get('/signup', (req, res) => {
-  dogstatsd.increment('user.signup.count');
-  res.send('User signed up!');
-});
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -73,18 +56,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
-
-// Set up an interval to send aggregated metrics
-setInterval(() => {
-  // Send aggregated metrics to Datadog
-  dogstatsd.increment('request.count', requestCount);
-  dogstatsd.timing('request.response_time', totalResponseTime / requestCount || 0); // Average response time
-  dogstatsd.histogram('response.size', totalResponseSize / requestCount || 0); // Average response size
-  dogstatsd.increment('request.errors', errorCount); // Total error count
-
-  // Reset metrics after sending
-  requestCount = 0;
-  totalResponseTime = 0;
-  totalResponseSize = 0;
-  errorCount = 0;
-}, 1000); // Send metrics every 60 seconds
