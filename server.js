@@ -7,7 +7,7 @@ const app = express();
 
 // Configure StatsD for Datadog
 const dogstatsd = new StatsD({
-  host: 'https://simpleweb-production-38a2f21a4cd2.herokuapp.com/', // For Heroku, use localhost
+  host: 'localhost', // For Heroku, use localhost
   port: 8125,
   prefix: 'simpleweb.' // Prefix for your metrics
 });
