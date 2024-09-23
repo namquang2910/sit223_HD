@@ -35,6 +35,5 @@ app.get('*', (req, res) => {
 // Listen on the port Heroku provides (or fallback to 3000 locally)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  logger.info(`Server is listening on port ${PORT}`);
   dogstatsd.increment('server.start'); // Track server start event
 });
