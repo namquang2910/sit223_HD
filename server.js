@@ -6,7 +6,7 @@ const app = express();
 
 // Set up StatsD client for Datadog
 const dogstatsd = new StatsD({
-  host: 'simpleweb-production', // Use your Datadog region
+  host: 'localhost', // Use your Datadog region
   port: 8125,
   prefix: 'simpleweb.' // Prefix for your metrics
 });
