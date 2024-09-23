@@ -1,24 +1,57 @@
 const express = require('express');
 const path = require('path');
 const winston = require('winston');
-const StatsD = require('hot-shots');
+const axios = require('axios');
 
 const app = express();
 
-// Configure StatsD for Datadog
-const dogstatsd = new StatsD({
-  host: 'localhost', // For Heroku, use localhost
-  port: 8125,
-  prefix: 'simpleweb.' // Prefix for your metrics
-});
+// Datadog API configuration
+const DATADOG_API_KEY = process.env.DD_API_KEY; // Set your Datadog API key in environment variables
+const DATADOG_API_URL = 'https://api.datadoghq.com/api/v1/series?api_key=' + DATADOG_API_KEY;
 
-// Configure Winston logger
+// Create a custom transport for sending metrics
+class DatadogTransport {
+  log(info, callback) {
+    setImmediate(() => this.emit('logged', info));
+
+    if (info.level === 'info') {
+      this.sendMetric('request.count', 1);
+    } else if (info.level === 'timing') {
+      this.sendMetric('request.response_time', info.duration);
+    }
+
+    callback();
+  }
+
+  sendMetric(metricName, value) {
+    const data = {
+      series: [{
+        metric: metricName,
+        points: [[Math.floor(Date.now() / 1000), value]],
+        type: 'gauge',
+        host: 'your-app-name.herokuapp.com', // Use your Heroku app name
+        tags: ['environment:production'] // You can add additional tags here
+      }]
+    };
+
+    // Send the metric to Datadog
+    axios.post(DATADOG_API_URL, data)
+      .then(response => {
+        console.log('Metric sent to Datadog:', response.data);
+      })
+      .catch(error => {
+        console.error('Error sending metric to Datadog:', error);
+      });
+  }
+}
+
+// Configure Winston logger with the custom transport
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
+    new DatadogTransport(), // Add your custom transport
     new winston.transports.Console(), // Log to console
-    // You can add other transports here (e.g., file)
   ]
 });
 
@@ -29,11 +62,10 @@ app.use((req, res, next) => {
     const duration = Date.now() - startTime;
 
     // Log the request
-    logger.info(`Request to ${req.url} took ${duration}ms`);
+    logger.info(`Request to ${req.url} took ${duration}ms`, { duration });
 
-    // Send metrics to Datadog
-    dogstatsd.increment('request.count'); // Increment request count
-    dogstatsd.timing('request.response_time', duration); // Send timing metric
+    // Send timing metric
+    logger.log({ level: 'timing', duration });
   });
   next();
 });
