@@ -4,14 +4,7 @@ pipeline {
         nodejs 'NodeJS' // NodeJS tool defined in Jenkins Global Tool Configuration
     }
     environment {
-        AWS_ACCESS_KEY_ID = credentials('Elastic-BeanTalk-cred')  // Use the ID of your AWS credentials
-        AWS_SECRET_ACCESS_KEY = credentials('Elastic-BeanTalk-cred')  // Same as above
-        S3_BUCKET = 'simpleweb-bucket'
-        APPLICATION_NAME = 'simple-web'  // CodeDeploy application name
-        DEPLOYMENT_GROUP_NAME = 'simpleWeb'  // CodeDeploy deployment group name
-        DEPLOYMENT_CONFIG_NAME = 'CodeDeployDefault.AllAtOnce'  // Deployment configuration
         PATH = "${env.PATH}:/opt/homebrew/bin/" // Adjust PATH if needed
-
         HEROKU_API_KEY = credentials('heroku-api-key')  // Your Heroku API key
         HEROKU_APP_STAGING = 'simpleweb-stagging'
         HEROKU_APP_PRODUCTION = 'simpleweb-production'
@@ -36,6 +29,7 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 sh """
+                git checkout -b main
                 heroku git:remote -a ${HEROKU_APP_STAGING}
                 git add .
                 git commit -m "Deploy to staging"
@@ -47,6 +41,7 @@ pipeline {
             steps {
                 input 'Approve deployment to production?'  // Manual approval step
                 sh """
+                git checkout -b main
                 heroku git:remote -a ${HEROKU_APP_PRODUCTION}
                 git add .
                 git commit -m "Deploy to production"
