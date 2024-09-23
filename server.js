@@ -6,7 +6,7 @@ const app = express();
 
 // Initialize the StatsD client
 const dogstatsd = new StatsD({
-  host: 'datadog-server', // Use the Datadog server (see below)
+  host: 'localhost', // Use the Datadog server (see below)
   port: 8125,
   prefix: 'myapp.' // Use a prefix for your application's metrics
 });
@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 
   next();
 });
+dogstatsd.increment('request.count');
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
