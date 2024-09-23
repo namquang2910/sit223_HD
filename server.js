@@ -1,28 +1,31 @@
 const express = require('express');
 const path = require('path');
-const tracer = require('dd-trace').init(); // Initialize the tracer
+const StatsD = require('hot-shots');
 
 const app = express();
 
-// Serve static files from the dist directory
-app.use(express.static(path.join(__dirname, 'dist')));
+// Set up StatsD client for Datadog
+const dogstatsd = new StatsD({
+  host: 'simpleweb-production', // Use your Datadog region
+  port: 8125,
+  prefix: 'simpleweb.' // Prefix for your metrics
+});
 
-// Middleware to automatically trace requests
+// Middleware to track request metrics
 app.use((req, res, next) => {
-  const startTime = Date.now();
-
+  const startTime = Date.now(); // Start timer for request duration
   res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    // Custom metrics (timing, request count, etc.)
-    tracer.trace('request', () => {
-      tracer.increment('request.count'); // Increment request count
-      tracer.timing('request.response_time', duration); // Send timing metric
-      tracer.increment(`request.status_code.${res.statusCode}`); // Track status codes
-    });
+    const duration = Date.now() - startTime; // Calculate request duration
+    dogstatsd.timing('request.response_time', duration); // Send timing metric
+    dogstatsd.increment('request.status_code.' + res.statusCode); // Track status codes
   });
 
+  dogstatsd.increment('request.count'); // Increment request count
   next();
 });
+
+// Serve static files from the dist directory
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Handle SPA routing
 app.get('*', (req, res) => {
@@ -32,5 +35,5 @@ app.get('*', (req, res) => {
 // Listen on the port Heroku provides (or fallback to 3000 locally)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+  dogstatsd.increment('server.start'); // Track server start event
 });
