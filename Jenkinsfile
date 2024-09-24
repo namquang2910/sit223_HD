@@ -25,7 +25,7 @@ pipeline {
             steps {
                 sh 'npm run build'  // Run Webpack to build the project
                 archiveArtifacts artifacts: 'dist/**/*', allowEmptyArchive: true  // Archive build artifacts
-            }
+            } 
         }
         stage('Test') {
             steps {
