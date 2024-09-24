@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const StatsD = require('hot-shots');
+
 const app = express();
 
 // Initialize the StatsD client
