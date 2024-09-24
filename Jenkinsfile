@@ -32,6 +32,17 @@ pipeline {
                 sh 'npm test'  // Run tests
             }
         }
+        stage('Code Quality Checkk')
+        {
+            environment {
+                scannerHome = tool 'sonar'
+            }
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '${scannerHome}/bin/sonar-scanner'
+            }
+        }
+        }
         stage('Deploy to Staging') {
             steps {
                 sh """
@@ -59,24 +70,26 @@ pipeline {
         }
         stage('Monitor Deployment') {
             steps {
-                sh """
-                heroku labs:enable runtime-dyno-metadata -a ${HEROKU_APP_PRODUCTION}
-                heroku buildpacks:add https://github.com/DataDog/heroku-buildpack-datadog.git
-                heroku config:add DD_AGENT_MAJOR_VERSION=7
-                heroku config:add DD_API_KEY=${DATADOG_API_KEY}
-                heroku config:add DD_SITE=us5.datadoghq.com
-                heroku restart -a ${HEROKU_APP_PRODUCTION}
-                """
-                script {
-                    def response = httpRequest "https:///simpleweb-production-38a2f21a4cd2.herokuapp.com"
-                    if (response.status == 200) {
-                        echo 'The application is up and running!'
-                    } else {
-                        error 'The application is not responding.'
-                    }
+                script{
+                sh'heroku labs:enable runtime-dyno-metadata -a ${HEROKU_APP_PRODUCTION}'
+                def buildpackList = sh(script: 'heroku buildpacks --app ${HEROKU_APP_PRODUCTION}', returnStdout: true).trim()
+                echo "Current Buildpacks: ${buildpackList}"
+                
+                // Check for the Datadog buildpack
+                if (buildpackList.contains("DataDog/heroku-buildpack-datadog.git")) {
+                    echo "Datadog buildpack is already installed."
+                } else {
+                    echo "Datadog buildpack is not installed."
+                    sh """
+                    heroku buildpacks:add https://github.com/DataDog/heroku-buildpack-datadog.git
+                    heroku config:add DD_AGENT_MAJOR_VERSION=7
+                    heroku config:add DD_API_KEY=${DATADOG_API_KEY}
+                    heroku config:add DD_SITE=us5.datadoghq.com
+                    """
+                }
+                sh 'heroku restart --app ${HEROKU_APP_PRODUCTION} '
                 }
             }
         }
     }
-    
 }
