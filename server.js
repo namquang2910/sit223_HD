@@ -21,14 +21,14 @@ app.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-    
     // Log request duration
     dogstatsd.timing('request.response_time', duration);
     // Log response size
     dogstatsd.histogram('response.size', res.get('Content-Length') || 0);
     // Track HTTP status codes
     dogstatsd.increment(`response.status.${res.statusCode}`);
-    
+    dogstatsd.increment('response.status', res.statusCode);
+    dogstatsd.timing('response.average_time', duration);
     // Increment response metrics based on status code
     dogstatsd.increment('response.count'); // Total responses
     if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -43,7 +43,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Setup Winston logger
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -55,7 +54,6 @@ const logger = winston.createLogger({
   ]
 });
 
-// Log server metrics every 5 seconds
 const logServerMetrics = () => {
   const memoryUsage = process.memoryUsage();
   logger.info('Server Metrics', {
@@ -69,15 +67,11 @@ const logServerMetrics = () => {
   });
 };
 
-// Set interval to log server metrics every 5 seconds
-setInterval(logServerMetrics, 5000); // Logs every 5 seconds
-
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Handle SPA (Single Page Application) routing
 app.get('*', (req, res) => {
-  logger.info(`Serving SPA for request to ${req.url}`, { timestamp: new Date().toISOString() });
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
@@ -86,3 +80,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+// Set interval to log server metrics every 5 seconds
+setInterval(logServerMetrics, 1000); // Logs every 5 seconds
