@@ -1,4 +1,4 @@
-pipeline {
+pipeline { 
     agent any
     tools {
         nodejs 'NodeJS' // NodeJS tool defined in Jenkins Global Tool Configuration
